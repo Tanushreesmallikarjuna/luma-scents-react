@@ -55,6 +55,7 @@ export default async function handler(req, res) {
     ct: hashCity(user.city),
     zp: hashZip(user.zip),
     country: sha256("in"),
+    external_id: user.externalId ? sha256(String(user.externalId)) : undefined,
     // NOT hashed:
     client_ip_address: ip,
     client_user_agent: req.headers["user-agent"],
