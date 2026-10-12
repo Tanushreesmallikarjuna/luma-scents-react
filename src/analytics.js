@@ -34,7 +34,14 @@ const cookie = (n) => document.cookie.split("; ").find((r) => r.startsWith(n + "
 // Customer details from checkout, kept for this browser session only (used to match events to Meta accounts).
 export function saveCustomer(c) { try { sessionStorage.setItem("luma_customer", JSON.stringify(c)); } catch { /* ignore */ } }
 const getCustomer = () => { try { return JSON.parse(sessionStorage.getItem("luma_customer")) || {}; } catch { return {}; } };
-
+// Anonymous visitor ID, created once per browser and reused on every event (sent to Meta as external_id).
+const visitorId = () => {
+  try {
+    let v = localStorage.getItem("luma_vid");
+    if (!v) { v = uid(); localStorage.setItem("luma_vid", v); }
+    return v;
+  } catch { return undefined; }
+};
 // Sends the same event (same event_id as the browser Pixel) to our Vercel function /api/meta-capi.
 function sendCapi(eventName, eventId, data, user) {
   try {
