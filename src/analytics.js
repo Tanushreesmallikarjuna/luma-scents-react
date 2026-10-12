@@ -63,7 +63,7 @@ function sendCapi(eventName, eventId, data, user) {
         eventName,
         eventId,
         sourceUrl: window.location.href,
-        user: { ...(user || getCustomer()), fbp: cookie("_fbp"), fbc: cookie("_fbc") },
+        user: { ...(user || getCustomer()), externalId: visitorId(), fbp: cookie("_fbp"), fbc: cookie("_fbc") },
         customData,
       }),
     }).catch(() => {});
