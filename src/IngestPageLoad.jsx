@@ -20,7 +20,7 @@ export default function IngestPageLoad() {
         window._mp.eedlInstance().ready();
 
         window._mp.safeExecute('evPageLoad', () => {
-          const isProd = /luma-scents\.vercel\.app/.test(window.location.href);
+          const isProd = /luma-scents-react\.vercel\.app/.test(window.location.href);
 
           const payload = {
             'page.pageInfo.pageName': document.title,
