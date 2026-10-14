@@ -42,6 +42,7 @@ export default function App() {
   return (
     <>
       <PageViews />
+      <IngestPageLoad />
       <Header />
       <main>
         <Routes>
