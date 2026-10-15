@@ -7,19 +7,21 @@
   window._mp.waitUntil(function() { return _mp && _mp.eedlInstance; }, 15000, 100, function () {
   _mp.eedlInstance().ready();
   window._mp.safeExecute('evPageLoad', function() {
-    var isProd = /www\.example\.com/.test(window.location.href);
     var payload = {
       'page.pageInfo.pageName': document.title,
       'env.pageUrl': window.location.href,
       'env.referrer': document.referrer,
       'env.pathName': window.location.pathname,
-      'env.rs': isProd ? 'prd' : 'stg',
-      'env.app_version': '<git_hash or app_version automated>',
+      'env.app_version': '1.0.0'
+      
     };
 
     eedl('page_load', payload);
   })();
 });
+
+  
+  
 </script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
