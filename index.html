@@ -1,103 +1,40 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-<script>!function(e,t,n,r){e.eedl||(e.mpDl=e.mpDl||[],e.eedl=e.eedl||function(){e.mpDl.push(Array.from(arguments))})}(window,document),function(e){function t(e,t,n){e[t]||(e[t]=n)}e._mp=e._mp||{},t(e._mp,"triggerEvent",(function(t,n,r){e._mp.safeExecute("triggerEvent",(function(e,t,n){if(t=t||{},n=n||window,e){var r=new CustomEvent(e,{detail:t});n.dispatchEvent(r)}}))(t,n,r)})),t(e._mp,"onDocumentReady",(function(t){/in/.test(document.readyState)?setTimeout(e._mp.onDocumentReady,9,t):t()})),t(e._mp,"waitUntil",(function(e,t,n,r){var o=n,a=setInterval((function(){try{var i=e.call(this);void 0===i||!1===i?o<t?o+=n:clearInterval(a):(clearInterval(a),r())}catch(e){}}),n)})),t(e._mp,"addScript",(function(t,n,r){e._mp.safeExecute("triggerEvent",(function(e,t,n){var r=document.createElement("script");r.id=e,r.async=n,r.src=t;var o=document.getElementsByTagName("script")[0]||document.getElementsByTagName("head")[0];o?o.parentNode.insertBefore(r,o):console&&console.error&&console.error("Could not append script with id: ",e," because no appendTo element was found")}))(t,n,r)})),t(e._mp,"safeExecute",(function(t,n){return function(){try{return n.apply(this,arguments)}catch(n){e._mp.mpReportErr(t,n.message,n&&n.stack?n.stack.toString():"")}}})),t(e._mp,"mpReportErr",(function(t,n,r,o){var a={errKey:t,errMessage:n,errStack:r,errLang:o||"js"};e._mp.triggerEvent("mp_log_err",{msg:n||"EEDL Err",payload:a}),e._mp.triggerEvent("mp_rpt_err",{err:a})})),t(e._mp,"mpReportMsg",(function(){e._mp.triggerEvent("mp_log_msg",{payload:arguments})})),t(e._mp,"setSessionVar",(function(t,n){return e._mp.safeExecute("setSessionVar",(function(e,t){return window.sessionStorage.setItem(e,t)}))(t,n)})),t(e._mp,"getSessionVar",(function(t){return e._mp.safeExecute("getSessionVar",(function(e){return window.sessionStorage.getItem(e)||null}))(t)})),t(e._mp,"getCookie",(function(e){var t=document.cookie.match(new RegExp("(^| )"+e+"=([^;]+)"));return t?t[2]:null}))}(window);  </script>
-<script src="https://sdk.magicpixel.dev/MPkr1vetx36h2rbcvh5xctr.js"></script>
-<script>
-  window._mp.waitUntil(function() { return _mp && _mp.eedlInstance; }, 15000, 100, function () {
-  _mp.eedlInstance().ready();
-  window._mp.safeExecute('evPageLoad', function() {
-    var payload = {
-      'page.pageInfo.pageName': document.title,
-      'env.pageUrl': window.location.href,
-      'env.referrer': document.referrer,
-      'env.pathName': window.location.pathname,
-      'env.app_version': '1.0.0',
-      
-    };
+  <script>!function (e, t, n, r) { e.eedl || (e.mpDl = e.mpDl || [], e.eedl = e.eedl || function () { e.mpDl.push(Array.from(arguments)) }) }(window, document), function (e) { function t(e, t, n) { e[t] || (e[t] = n) } e._mp = e._mp || {}, t(e._mp, "triggerEvent", (function (t, n, r) { e._mp.safeExecute("triggerEvent", (function (e, t, n) { if (t = t || {}, n = n || window, e) { var r = new CustomEvent(e, { detail: t }); n.dispatchEvent(r) } }))(t, n, r) })), t(e._mp, "onDocumentReady", (function (t) { /in/.test(document.readyState) ? setTimeout(e._mp.onDocumentReady, 9, t) : t() })), t(e._mp, "waitUntil", (function (e, t, n, r) { var o = n, a = setInterval((function () { try { var i = e.call(this); void 0 === i || !1 === i ? o < t ? o += n : clearInterval(a) : (clearInterval(a), r()) } catch (e) { } }), n) })), t(e._mp, "addScript", (function (t, n, r) { e._mp.safeExecute("triggerEvent", (function (e, t, n) { var r = document.createElement("script"); r.id = e, r.async = n, r.src = t; var o = document.getElementsByTagName("script")[0] || document.getElementsByTagName("head")[0]; o ? o.parentNode.insertBefore(r, o) : console && console.error && console.error("Could not append script with id: ", e, " because no appendTo element was found") }))(t, n, r) })), t(e._mp, "safeExecute", (function (t, n) { return function () { try { return n.apply(this, arguments) } catch (n) { e._mp.mpReportErr(t, n.message, n && n.stack ? n.stack.toString() : "") } } })), t(e._mp, "mpReportErr", (function (t, n, r, o) { var a = { errKey: t, errMessage: n, errStack: r, errLang: o || "js" }; e._mp.triggerEvent("mp_log_err", { msg: n || "EEDL Err", payload: a }), e._mp.triggerEvent("mp_rpt_err", { err: a }) })), t(e._mp, "mpReportMsg", (function () { e._mp.triggerEvent("mp_log_msg", { payload: arguments }) })), t(e._mp, "setSessionVar", (function (t, n) { return e._mp.safeExecute("setSessionVar", (function (e, t) { return window.sessionStorage.setItem(e, t) }))(t, n) })), t(e._mp, "getSessionVar", (function (t) { return e._mp.safeExecute("getSessionVar", (function (e) { return window.sessionStorage.getItem(e) || null }))(t) })), t(e._mp, "getCookie", (function (e) { var t = document.cookie.match(new RegExp("(^| )" + e + "=([^;]+)")); return t ? t[2] : null })) }(window);  </script>
+  <script src="https://sdk.magicpixel.dev/MPkr1vetx36h2rbcvh5xctr.js"></script>
+  <script>
+    window._mp.waitUntil(function () { return _mp && _mp.eedlInstance; }, 15000, 100, function () {
+      _mp.eedlInstance().ready();
+      window._mp.safeExecute('evPageLoad', function () {
+        var payload = {
+          'page.pageInfo.pageName': document.title,
+          'env.pageUrl': window.location.href,
+          'env.referrer': document.referrer,
+          'env.pathName': window.location.pathname,
+          'env.app_version': '1.0.0',
 
-    eedl('page_load', payload);
-  })();
-});
-</script>
-<script>
-(function () {
-  function getCartId() {
-    try {
-      var cid = localStorage.getItem('luma_cart_id');
-      if (!cid) {
-        cid = 'cart_' + (window.crypto && window.crypto.randomUUID ? window.crypto.randomUUID() : (Date.now() + '_' + Math.random().toString(36).slice(2, 8)));
-        localStorage.setItem('luma_cart_id', cid);
-      }
-      return cid;
-    } catch (_) {
-      return 'cart_' + Date.now();
-    }
-  }
+        };
 
-  function sendViewItem(ec) {
-    window._mp.waitUntil(
-      function () { return !!(window._mp && window._mp.eedlInstance); },
-      15000, 100,
-      function () {
-        var inst = window._mp.eedlInstance();
-        if (!inst.isReady) inst.ready();
-
-        window._mp.safeExecute('evViewItem', function () {
-          eedl('mp_view_item', {
-            currency: ec.currency || 'INR',
-            value: ec.value,
-            items: ec.items,
-            ev_source: 'gtm'
-          });
-        })();
-      }
-    );
-  }
-
-  function sendAddToCart(ec) {
-    window._mp.waitUntil(
-      function () { return !!(window._mp && window._mp.eedlInstance); },
-      15000, 100,
-      function () {
-        var inst = window._mp.eedlInstance();
-        if (!inst.isReady) inst.ready();
-
-        window._mp.safeExecute('evAddToCart', function () {
-          eedl('mp_add_to_cart', {
-            currency: ec.currency || 'INR',
-            cart_id: ec.cart_id || getCartId(),
-            value: ec.value,
-            items: ec.items,
-            ev_source: 'gtm'
-          });
-        })();
-      }
-    );
-  }
-
-  window.dataLayer = window.dataLayer || [];
-  var _push = window.dataLayer.push;
-  window.dataLayer.push = function () {
-    var res = _push.apply(this, arguments);
-    try {
-      var e = arguments[0];
-      if (e && e.event === 'view_item') sendViewItem(e.ecommerce || {});
-      if (e && e.event === 'add_to_cart') sendAddToCart(e.ecommerce || {});
-    } catch (err) {
-      console.warn('mp tracking failed', err);
-    }
-    return res;
-  };
-})();
-</script>
-<meta charset="utf-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Luma Scents | Perfumes, candles and fragrance gifts</title>
-<meta name="description" content="Luma Scents: small-batch perfumes, candles, discovery kits and gift sets.">
-<meta property="og:title" content="Luma Scents">
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
+        eedl('page_load', payload);
+      })();
+    });
+  </script>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Luma Scents | Perfumes, candles and fragrance gifts</title>
+  <meta name="description" content="Luma Scents: small-batch perfumes, candles, discovery kits and gift sets.">
+  <meta property="og:title" content="Luma Scents">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link
+    href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600&family=DM+Sans:wght@400;500;700&display=swap"
+    rel="stylesheet">
 </head>
-<body><div id="root"></div><script type="module" src="/src/main.jsx"></script></body>
+
+<body>
+  <div id="root"></div>
+  <script type="module" src="/src/main.jsx"></script>
+</body>
+
 </html>

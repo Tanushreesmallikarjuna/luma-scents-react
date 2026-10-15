@@ -1,21 +1,5 @@
-// Website -> dataLayer.push() -> Google Tag Manager -> Trigger -> GA4 Event Tag -> GA4
-// The GA4 Measurement ID is NOT in this code; it lives in your GTM container.
-// If GTM is missing or blocked, every function here fails silently and the shop still works.
-window.dataLayer = window.dataLayer || [];
-
-export function loadGtm() {
-  const id = import.meta.env.VITE_GTM_ID;
-  if (!id || id.includes("XXXX")) return;
-  window.dataLayer.push({ "gtm.start": Date.now(), event: "gtm.js" });
-  const s = document.createElement("script");
-  s.async = true;
-  s.src = "https://www.googletagmanager.com/gtm.js?id=" + id;
-  document.head.appendChild(s);
-}
-
 export function push(o) {
   try {
-    window.dataLayer.push(o);
     window.dispatchEvent(new CustomEvent("dl", { detail: o })); // feeds the on-page log
   } catch { /* never break shopping because of analytics */ }
 }
@@ -70,15 +54,56 @@ function sendCapi(eventName, eventId, data, user) {
   } catch { /* never break shopping because of analytics */ }
 }
 
-// Clears the previous ecommerce object first so stale data never merges into the next event.
-// For view_item / add_to_cart / begin_checkout / purchase it also adds an event_id (GTM passes it to the
-// Meta Pixel as eventID) and sends the same event to Meta Conversions API with that same id.
+// Ingest Labs (MagicPixel) Direct Tracking
+function getCartId() {
+  try {
+    let cid = localStorage.getItem("luma_cart_id");
+    if (!cid) {
+      cid = "cart_" + (window.crypto?.randomUUID ? window.crypto.randomUUID() : `${Date.now()}_${Math.random().toString(36).slice(2, 8)}`);
+      localStorage.setItem("luma_cart_id", cid);
+    }
+    return cid;
+  } catch (_) {
+    return "cart_" + Date.now();
+  }
+}
+
+function sendIngest(event, data) {
+  try {
+    if (typeof window === "undefined" || !window._mp || typeof window.eedl !== "function") return;
+
+    if (event === "view_item") {
+      window._mp.safeExecute("evViewItem", function () {
+        window.eedl("mp_view_item", {
+          currency: data.currency || "INR",
+          value: data.value,
+          items: data.items,
+          ev_source: "web"
+        });
+      })();
+    } else if (event === "add_to_cart") {
+      window._mp.safeExecute("evAddToCart", function () {
+        window.eedl("mp_add_to_cart", {
+          currency: data.currency || "INR",
+          cart_id: getCartId(),
+          value: data.value,
+          items: data.items,
+          ev_source: "web"
+        });
+      })();
+    }
+  } catch (err) {
+    console.warn("Ingest tracking error", err);
+  }
+}
+
 export function ecom(event, data, dedupe = false, opts = {}) {
   if (dedupe && isDup(event + JSON.stringify(data))) return;
   const metaName = META_MAP[event];
   const eventId = metaName ? opts.eventId || uid() : undefined;
   push({ ecommerce: null });
   push({ event, ...(eventId && { event_id: eventId }), ecommerce: { currency: "INR", ...data } });
+  sendIngest(event, data);
   if (metaName) sendCapi(metaName, eventId, data, opts.user);
 }
 export function track(event, params = {}, dedupe = false) {
