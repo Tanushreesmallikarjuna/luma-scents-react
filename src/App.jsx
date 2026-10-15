@@ -1,5 +1,4 @@
 import { useEffect, useState } from "react";
-import IngestPageLoad from './IngestPageLoad';
 import { Link, Route, Routes, useLocation, useNavigate } from "react-router-dom";
 import { useCart } from "./store";
 import { track } from "./analytics";
@@ -42,7 +41,6 @@ export default function App() {
   return (
     <>
       <PageViews />
-      <IngestPageLoad />
       <Header />
       <main>
         <Routes>
