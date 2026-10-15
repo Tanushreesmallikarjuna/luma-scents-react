@@ -22,6 +22,19 @@
 </script>
 <script>
 (function () {
+  function getCartId() {
+    try {
+      var cid = localStorage.getItem('luma_cart_id');
+      if (!cid) {
+        cid = 'cart_' + (window.crypto && window.crypto.randomUUID ? window.crypto.randomUUID() : (Date.now() + '_' + Math.random().toString(36).slice(2, 8)));
+        localStorage.setItem('luma_cart_id', cid);
+      }
+      return cid;
+    } catch (_) {
+      return 'cart_' + Date.now();
+    }
+  }
+
   function sendViewItem(ec) {
     window._mp.waitUntil(
       function () { return !!(window._mp && window._mp.eedlInstance); },
@@ -42,6 +55,27 @@
     );
   }
 
+  function sendAddToCart(ec) {
+    window._mp.waitUntil(
+      function () { return !!(window._mp && window._mp.eedlInstance); },
+      15000, 100,
+      function () {
+        var inst = window._mp.eedlInstance();
+        if (!inst.isReady) inst.ready();
+
+        window._mp.safeExecute('evAddToCart', function () {
+          eedl('mp_add_to_cart', {
+            currency: ec.currency || 'INR',
+            cart_id: ec.cart_id || getCartId(),
+            value: ec.value,
+            items: ec.items,
+            ev_source: 'gtm'
+          });
+        })();
+      }
+    );
+  }
+
   window.dataLayer = window.dataLayer || [];
   var _push = window.dataLayer.push;
   window.dataLayer.push = function () {
@@ -49,8 +83,9 @@
     try {
       var e = arguments[0];
       if (e && e.event === 'view_item') sendViewItem(e.ecommerce || {});
+      if (e && e.event === 'add_to_cart') sendAddToCart(e.ecommerce || {});
     } catch (err) {
-      console.warn('mp_view_item failed', err);
+      console.warn('mp tracking failed', err);
     }
     return res;
   };
