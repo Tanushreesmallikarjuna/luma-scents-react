@@ -19,6 +19,16 @@
     eedl('page_load', payload);
   })();
 });
+</script>
+  <script>
+  window._mp.safeExecute('evViewItem', function() {
+   eedl('mp_view_item', {
+      currency: 'INR', /* Currency of website */
+      value: 123.33, // float value of the item being viewed
+      items: [/* Refer to Products Array page in reference below */],
+      ev_source: 'gtm'
+    });
+  })();
 
   
   
