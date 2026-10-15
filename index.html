@@ -20,18 +20,41 @@
   })();
 });
 </script>
-  <script>
-  window._mp.safeExecute('evViewItem', function() {
-   eedl('mp_view_item', {
-      currency: 'INR', /* Currency of website */
-      value: 123.33, // float value of the item being viewed
-      items: [/* Refer to Products Array page in reference below */],
-      ev_source: 'gtm'
-    });
-  })();
+<script>
+(function () {
+  function sendViewItem(ec) {
+    window._mp.waitUntil(
+      function () { return !!(window._mp && window._mp.eedlInstance); },
+      15000, 100,
+      function () {
+        var inst = window._mp.eedlInstance();
+        if (!inst.isReady) inst.ready();
 
-  
-  
+        window._mp.safeExecute('evViewItem', function () {
+          eedl('mp_view_item', {
+            currency: ec.currency || 'INR',
+            value: ec.value,
+            items: ec.items,
+            ev_source: 'gtm'
+          });
+        })();
+      }
+    );
+  }
+
+  window.dataLayer = window.dataLayer || [];
+  var _push = window.dataLayer.push;
+  window.dataLayer.push = function () {
+    var res = _push.apply(this, arguments);
+    try {
+      var e = arguments[0];
+      if (e && e.event === 'view_item') sendViewItem(e.ecommerce || {});
+    } catch (err) {
+      console.warn('mp_view_item failed', err);
+    }
+    return res;
+  };
+})();
 </script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
