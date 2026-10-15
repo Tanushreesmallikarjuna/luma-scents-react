@@ -68,7 +68,7 @@ function getCartId() {
   }
 }
 
-function sendIngest(event, data) {
+function sendIngest(event, data, opts = {}) {
   try {
     if (typeof window === "undefined" || !window._mp || typeof window.eedl !== "function") return;
 
@@ -91,6 +91,47 @@ function sendIngest(event, data) {
           ev_source: "web"
         });
       })();
+    } else if (event === "purchase") {
+      window._mp.safeExecute("evPurchase", function () {
+        const c = opts.user || {};
+
+        // 1. Who bought (only fields that exist; change the names to match your checkout form)
+        const userInfo = {
+          pid: visitorId(),
+          email: c.email,
+          phone: c.phone,
+          country: "IN",
+          city: c.city,
+          state: c.state,
+          fName: c.firstName || c.fName,
+          lName: c.lastName || c.lName,
+          zip: c.zip || c.pincode,
+        };
+        Object.keys(userInfo).forEach((k) => userInfo[k] === undefined && delete userInfo[k]);
+        window.eedl("user_info", userInfo);
+
+        // 2. What they bought
+        window.eedl("mp_purchase", {
+          currency: data.currency || "INR",
+          transaction_id: data.transaction_id,
+          cart_id: getCartId(),
+          value: data.value,
+          coupon: data.coupon,
+          shipping: data.shipping,
+          tax: data.tax,
+          items: (data.items || []).map((i, idx) => ({
+            item_id: i.item_id,
+            item_name: i.item_name,
+            item_sku: i.item_sku || i.item_id,
+            index: idx,
+            price: i.price,
+            quantity: i.quantity,
+            item_brand: "Luma Scents",
+            item_category: i.item_category,
+          })),
+          ev_source: "web"
+        });
+      })();
     }
   } catch (err) {
     console.warn("Ingest tracking error", err);
@@ -103,7 +144,7 @@ export function ecom(event, data, dedupe = false, opts = {}) {
   const eventId = metaName ? opts.eventId || uid() : undefined;
   push({ ecommerce: null });
   push({ event, ...(eventId && { event_id: eventId }), ecommerce: { currency: "INR", ...data } });
-  sendIngest(event, data);
+    sendIngest(event, data, opts);
   if (metaName) sendCapi(metaName, eventId, data, opts.user);
 }
 export function track(event, params = {}, dedupe = false) {
