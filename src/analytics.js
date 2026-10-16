@@ -1,22 +1,21 @@
-
 export function push(o) {
   try {
     window.dispatchEvent(new CustomEvent("dl", { detail: o })); // feeds the on-page log
   } catch { /* never break shopping because of analytics */ }
 }
- 
+
 // React StrictMode runs effects twice in development, which duplicates events
 // (e.g. two begin_checkout). Events fired from effects pass dedupe=true so an
 // identical event within 400ms is dropped. Click-driven events do not use it.
 let last = { k: "", t: 0 };
 const isDup = (k) => { const n = Date.now(); const d = k === last.k && n - last.t < 400; last = { k, t: n }; return d; };
- 
+
 const uid = () => (window.crypto?.randomUUID ? window.crypto.randomUUID() : `${Date.now()}-${Math.random().toString(36).slice(2, 10)}`);
- 
+
 // Customer details from checkout, kept for this browser session only.
 export function saveCustomer(c) { try { sessionStorage.setItem("luma_customer", JSON.stringify(c)); } catch { /* ignore */ } }
 const getCustomer = () => { try { return JSON.parse(sessionStorage.getItem("luma_customer")) || {}; } catch { return {}; } };
- 
+
 // Anonymous visitor ID, created once per browser and reused on every event.
 const visitorId = () => {
   try {
@@ -25,7 +24,7 @@ const visitorId = () => {
     return v;
   } catch { return undefined; }
 };
- 
+
 // ---------------------------------------------------------------------------
 // Ingest Labs (MagicPixel) direct tracking
 // ---------------------------------------------------------------------------
@@ -41,14 +40,14 @@ function getCartId() {
     return "cart_" + Date.now();
   }
 }
- 
+
 // A new cart ID is created for the next order after a purchase.
 const resetCartId = () => { try { localStorage.removeItem("luma_cart_id"); } catch { /* ignore */ } };
- 
+
 function sendIngest(event, data, opts = {}) {
   try {
     if (typeof window === "undefined" || !window._mp || typeof window.eedl !== "function") return;
- 
+
     if (event === "view_item") {
       window._mp.safeExecute("evViewItem", function () {
         window.eedl("mp_view_item", {
@@ -84,7 +83,7 @@ function sendIngest(event, data, opts = {}) {
     } else if (event === "purchase") {
       window._mp.safeExecute("evPurchase", function () {
         const c = opts.user || getCustomer();
- 
+
         // 1. Who bought. Fields your checkout does not collect (like state) are skipped.
         const userInfo = {
           pid: visitorId(),
@@ -99,7 +98,7 @@ function sendIngest(event, data, opts = {}) {
         };
         Object.keys(userInfo).forEach((k) => userInfo[k] === undefined && delete userInfo[k]);
         window.eedl("user_info", userInfo);
- 
+
         // 2. What they bought
         window.eedl("mp_purchase", {
           currency: data.currency || "INR",
@@ -127,7 +126,7 @@ function sendIngest(event, data, opts = {}) {
     console.warn("Ingest tracking error", err);
   }
 }
- 
+
 export function ecom(event, data, dedupe = false, opts = {}) {
   if (dedupe && isDup(event + JSON.stringify(data))) return;
   push({ ecommerce: null });
@@ -138,15 +137,15 @@ export function track(event, params = {}, dedupe = false) {
   if (dedupe && isDup(event + JSON.stringify(params))) return;
   push({ event, ...params });
 }
- 
+
 // One item schema for every event: numeric price/quantity, stable item_id.
 export const gaItem = (p, quantity = 1, extra = {}) =>
   ({ item_id: p.id, item_name: p.name, item_category: p.cat, price: p.price, quantity, ...extra });
 export const sum = (items) => items.reduce((s, i) => s + i.price * i.quantity, 0);
- 
+
 // Dummy transaction id for practice. A real store uses the backend order number.
 export const dummyTransactionId = () => `T-${Date.now()}-${Math.floor(1000 + Math.random() * 9000)}`;
- 
+
 // Purchase fires once per transaction_id, even if the thank-you page is refreshed.
 export function trackPurchase(o) {
   let done = [];
@@ -157,4 +156,3 @@ export function trackPurchase(o) {
   resetCartId(); // the next order gets a fresh cart_id
   return true;
 }
- 
