@@ -214,7 +214,13 @@ export function Checkout() {
         </form>
       ) : (
         <form onSubmit={paySubmit}>
-          <label>Payment method<select name="p"><option>UPI</option><option>Card</option><option>Cash on delivery</option></select></label>
+          <label>Payment method
+  <select name="p" defaultValue="UPI">
+    <option value="UPI">UPI</option>
+    <option value="Card">Card</option>
+    <option value="COD">Cash on delivery</option>
+  </select>
+</label>
           <p className="mute">Demo only: no payment is collected and no card details are stored.</p>
           <button className="btn">Pay {inr(t.total)}</button>
         </form>
