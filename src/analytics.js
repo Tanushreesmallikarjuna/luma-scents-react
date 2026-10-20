@@ -108,6 +108,7 @@ function sendIngest(event, data, opts = {}) {
           coupon: data.coupon,
           shipping: data.shipping,
           tax: data.tax,
+          payment_type: data.payment_type,
           items: (data.items || []).map((i, idx) => ({
             item_id: i.item_id,
             item_name: i.item_name,
@@ -152,7 +153,15 @@ export function trackPurchase(o) {
   try { done = JSON.parse(localStorage.getItem("luma_tracked")) || []; } catch { /* ignore */ }
   if (done.includes(o.id)) return false;
   try { localStorage.setItem("luma_tracked", JSON.stringify([...done, o.id])); } catch { /* ignore */ }
-  ecom("purchase", { transaction_id: o.id, value: o.total, tax: o.tax, shipping: o.shipping, coupon: o.coupon || undefined, items: o.items }, false, { user: o.customer });
+  ecom("purchase", {
+    transaction_id: o.id,
+    value: o.total,
+    tax: o.tax,
+    shipping: o.shipping,
+    coupon: o.coupon || undefined,
+    payment_type: o.pay, // payment method picked on the checkout payment step
+    items: o.items
+  }, false, { user: o.customer });
   resetCartId(); // the next order gets a fresh cart_id
   return true;
 }
