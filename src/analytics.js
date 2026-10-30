@@ -102,7 +102,7 @@ function sendIngest(event, data, opts = {}) {
       })();
     } else if (event === "add_payment_info") {
       window._mp.safeExecute("evAddPaymentInfo", function () {
-        window.eedl("add_payment_info", {
+        window.eedl("mp_add_payment_info", {
           currency: data.currency || "INR",
           cart_id: getCartId(),
           value: data.value,
