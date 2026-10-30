@@ -67,6 +67,27 @@ function sendIngest(event, data, opts = {}) {
           ev_source: "web"
         });
       })();
+    } else if (event === "view_cart") {
+      window._mp.safeExecute("evViewCart", function () {
+        window.eedl("mp_view_cart", {
+          currency: data.currency || "INR",
+          cart_id: getCartId(),
+          value: data.value,
+          items: data.items,
+          ev_source: "web"
+        });
+      })();
+    } else if (event === "begin_checkout") {
+      window._mp.safeExecute("evBeginCheckout", function () {
+        window.eedl("mp_begin_checkout", {
+          currency: data.currency || "INR",
+          cart_id: getCartId(),
+          value: data.value,
+          coupon: data.coupon,
+          items: data.items,
+          ev_source: "web"
+        });
+      })();
     } else if (event === "add_payment_info") {
       window._mp.safeExecute("evAddPaymentInfo", function () {
         window.eedl("mp_add_payment_info", {
