@@ -88,6 +88,18 @@ function sendIngest(event, data, opts = {}) {
           ev_source: "web"
         });
       })();
+        } else if (event === "add_shipping_info") {
+      window._mp.safeExecute("evAddShippingInfo", function () {
+        window.eedl("mp_add_shipping_info", {
+          currency: data.currency || "INR",
+          cart_id: getCartId(),
+          value: data.value,
+          coupon: data.coupon,
+          shipping_tier: data.shipping_tier,
+          items: data.items,
+          ev_source: "web"
+        });
+      })();
     } else if (event === "add_payment_info") {
       window._mp.safeExecute("evAddPaymentInfo", function () {
         window.eedl("mp_add_payment_info", {
