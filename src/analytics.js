@@ -88,7 +88,7 @@ function sendIngest(event, data, opts = {}) {
           ev_source: "web"
         });
       })();
-        } else if (event === "add_shipping_info") {
+    } else if (event === "add_shipping_info") {
       window._mp.safeExecute("evAddShippingInfo", function () {
         window.eedl("mp_add_shipping_info", {
           currency: data.currency || "INR",
@@ -96,6 +96,16 @@ function sendIngest(event, data, opts = {}) {
           value: data.value,
           coupon: data.coupon,
           shipping_tier: data.shipping_tier,
+          items: data.items,
+          ev_source: "web"
+        });
+      })();
+    } else if (event === "remove_from_cart") {
+      window._mp.safeExecute("evRemoveFromCart", function () {
+        window.eedl("mp_remove_from_cart", {
+          currency: data.currency || "INR",
+          cart_id: getCartId(),
+          value: data.value,
           items: data.items,
           ev_source: "web"
         });
@@ -110,6 +120,51 @@ function sendIngest(event, data, opts = {}) {
           payment_type: data.payment_type,
           shipping: data.shipping,
           items: data.items,
+          ev_source: "web"
+        });
+      })();
+    } else if (event === "search") {
+      window._mp.safeExecute("evSearch", function () {
+        window.eedl("mp_search", {
+          search_term: data.search_term,
+          ev_source: "web"
+        });
+      })();
+    } else if (event === "apply_coupon") {
+      window._mp.safeExecute("evApplyCoupon", function () {
+        window.eedl("mp_apply_coupon", {
+          cart_id: getCartId(),
+          coupon: data.coupon,
+          discount_percent: data.discount_percent,
+          ev_source: "web"
+        });
+      })();
+    } else if (event === "coupon_failed") {
+      window._mp.safeExecute("evCouponFailed", function () {
+        window.eedl("mp_coupon_failed", {
+          cart_id: getCartId(),
+          coupon: data.coupon,
+          reason: data.reason,
+          ev_source: "web"
+        });
+      })();
+    } else if (event === "view_promotion") {
+      window._mp.safeExecute("evViewPromotion", function () {
+        window.eedl("mp_view_promotion", {
+          creative_name: data.creative_name,
+          creative_slot: data.creative_slot,
+          promotion_id: data.promotion_id,
+          promotion_name: data.promotion_name,
+          ev_source: "web"
+        });
+      })();
+    } else if (event === "select_promotion") {
+      window._mp.safeExecute("evSelectPromotion", function () {
+        window.eedl("mp_select_promotion", {
+          creative_name: data.creative_name,
+          creative_slot: data.creative_slot,
+          promotion_id: data.promotion_id,
+          promotion_name: data.promotion_name,
           ev_source: "web"
         });
       })();
@@ -170,6 +225,7 @@ export function ecom(event, data, dedupe = false, opts = {}) {
 export function track(event, params = {}, dedupe = false) {
   if (dedupe && isDup(event + JSON.stringify(params))) return;
   push({ event, ...params });
+  sendIngest(event, params); // events without a branch in sendIngest (like page_view) are ignored there
 }
 
 // One item schema for every event: numeric price/quantity, stable item_id.
