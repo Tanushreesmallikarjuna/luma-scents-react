@@ -35,17 +35,24 @@ export function Shop() {
     return r;
   }, [cat, q, sort]);
   useEffect(() => { document.title = "Luma Scents | Perfumes, candles and fragrance gifts"; }, []);
-  // view_promotion fires once, when at least half of the banner is actually on screen.
   const promoRef = useRef(null);
   useEffect(() => {
     const el = promoRef.current;
     if (!el || typeof IntersectionObserver === "undefined") return;
+    const key = "luma_promo_seen_" + PROMO.promotion_id;
+    try { if (sessionStorage.getItem(key)) return; } catch { /* ignore */ }
     const io = new IntersectionObserver((entries) => {
-      if (entries.some((e) => e.isIntersecting)) { ecom("view_promotion", PROMO, true); io.disconnect(); }
+      if (entries.some((e) => e.isIntersecting)) {
+        try { sessionStorage.setItem(key, "1"); } catch { /* ignore */ }
+        ecom("view_promotion", PROMO, true);
+        io.disconnect();
+      }
     }, { threshold: 0.5 });
     io.observe(el);
     return () => io.disconnect();
   }, []);
+  // view_promotion fires once, when at least half of the banner is actually on screen.
+  
   useEffect(() => {
     if (list.length) ecom("view_item_list", { item_list_id: cat.toLowerCase().replace(/ /g, "_"), item_list_name: ln, items: list.map((p, i) => gaItem(p, 1, { index: i, item_list_name: ln })) }, true);
   }, [list]); // eslint-disable-line
