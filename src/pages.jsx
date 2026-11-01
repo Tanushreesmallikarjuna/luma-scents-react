@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { Link, useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { CATS, PRODUCTS, bySlug, inr, swatch } from "./data";
 import { useCart, RATES } from "./store";
@@ -19,7 +19,7 @@ function Price({ p }) {
   );
 }
 
-const PROMO = { creative_name: "sale_banner", promotion_id: "SALE50", promotion_name: "50% OFF SALE" };
+const PROMO = { creative_name: "sale_banner", creative_slot: "home_banner", promotion_id: "SALE50", promotion_name: "50% OFF SALE" };
 
 export function Shop() {
   const [sp, setSp] = useSearchParams();
@@ -35,7 +35,17 @@ export function Shop() {
     return r;
   }, [cat, q, sort]);
   useEffect(() => { document.title = "Luma Scents | Perfumes, candles and fragrance gifts"; }, []);
-  useEffect(() => { ecom("view_promotion", PROMO, true); }, []); // banner shown
+  // view_promotion fires once, when at least half of the banner is actually on screen.
+  const promoRef = useRef(null);
+  useEffect(() => {
+    const el = promoRef.current;
+    if (!el || typeof IntersectionObserver === "undefined") return;
+    const io = new IntersectionObserver((entries) => {
+      if (entries.some((e) => e.isIntersecting)) { ecom("view_promotion", PROMO, true); io.disconnect(); }
+    }, { threshold: 0.5 });
+    io.observe(el);
+    return () => io.disconnect();
+  }, []);
   useEffect(() => {
     if (list.length) ecom("view_item_list", { item_list_id: cat.toLowerCase().replace(/ /g, "_"), item_list_name: ln, items: list.map((p, i) => gaItem(p, 1, { index: i, item_list_name: ln })) }, true);
   }, [list]); // eslint-disable-line
@@ -47,7 +57,7 @@ export function Shop() {
         <h1>Scent that stays in the room.</h1>
         <p>Small-batch perfumes, candles and gifts, poured in Mysuru and named for the hour they suit best.</p>
       </section>
-      <div className="promo">
+      <div className="promo" ref={promoRef}>
         <h2>🎉 50% OFF SALE — ALL PRODUCTS</h2>
         <button className="btn" onClick={() => { ecom("select_promotion", PROMO); nav("/sale"); }}>SHOP 50% OFF</button>
       </div>
@@ -138,7 +148,13 @@ export function CartPage() {
   if (!lines.length) return <div className="page"><h2>Your cart is empty</h2><p className="mute">Add a fragrance to get started.</p><Link className="btn" to="/">Continue shopping</Link></div>;
   const apply = () => {
     const c = code.trim().toUpperCase();
-    if (c === "" || RATES[c]) { setCoupon(c); setMsg(c ? `${RATES[c] * 100}% off applied` : "Coupon removed"); } else setMsg("That code is not valid");
+    if (c === "" || RATES[c]) {
+      setCoupon(c); setMsg(c ? `${RATES[c] * 100}% off applied` : "Coupon removed");
+      if (c) track("apply_coupon", { coupon: c, discount_percent: RATES[c] * 100 });
+    } else {
+      setMsg("That code is not valid");
+      track("coupon_failed", { coupon: c, reason: "invalid_code" });
+    }
   };
   return (
     <div className="page">
