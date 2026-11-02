@@ -10,18 +10,16 @@ const read = () => { try { return JSON.parse(localStorage.getItem("luma_cart")) 
 export function CartProvider({ children }) {
   const [cart, setCart] = useState(read);
   const [coupon, setCoupon] = useState("");
-  const [drawer, setDrawer] = useState(false);
+  const [drawer, setDrawer] = useState(false); // cart drawer open/closed
   useEffect(() => { try { localStorage.setItem("luma_cart", JSON.stringify(cart)); } catch { /* ignore */ } }, [cart]);
-
   const lines = Object.entries(cart).map(([id, q]) => ({ p: byId(id), q })).filter((l) => l.p);
   const count = lines.reduce((s, l) => s + l.q, 0);
 
   // Analytics calls sit in these handlers (fired by clicks), not inside setState updaters.
-  const add = (p, n = 1, open = true) => {
+  const add = (p, n = 1) => {
     const q = (cart[p.id] || 0) + n;
     if (q > p.stock) return false; // never exceed stock
     setCart({ ...cart, [p.id]: q });
-    if (open) setDrawer(true); // slide the cart in after an add (pass false to skip)
     ecom("add_to_cart", { value: p.price * n, items: [gaItem(p, n)] });
     return true;
   };
@@ -39,6 +37,16 @@ export function CartProvider({ children }) {
   };
   const clear = () => setCart({});
 
+  // Opens the drawer from the header button. view_cart is sent once per click.
+  const openCart = () => {
+    if (drawer) return;
+    setDrawer(true);
+    if (lines.length) {
+      const sub = lines.reduce((s, l) => s + l.p.price * l.q, 0);
+      ecom("view_cart", { value: sub, items: lines.map((l) => gaItem(l.p, l.q)) });
+    }
+  };
+
   // Demo totals. In the full-stack version the server calculates these.
   const totals = (express = false) => {
     const sub = lines.reduce((s, l) => s + l.p.price * l.q, 0);
@@ -48,10 +56,10 @@ export function CartProvider({ children }) {
     const tax = Math.round(net * 0.18);
     return { sub, disc, net, shipping, tax, total: net + shipping + tax };
   };
-  // Opening the drawer from the header button counts as viewing the cart.
-  const openCart = () => {
-    setDrawer(true);
-    if (lines.length) ecom("view_cart", { value: totals().sub, items: lines.map((l) => gaItem(l.p, l.q)) }, true);
-  };
-  return <Ctx.Provider value={{ lines, count, add, dec, remove, clear, coupon, setCoupon, totals, drawer, setDrawer, openCart }}>{children}</Ctx.Provider>;
+
+  return (
+    <Ctx.Provider value={{ lines, count, add, dec, remove, clear, coupon, setCoupon, totals, drawer, setDrawer, openCart }}>
+      {children}
+    </Ctx.Provider>
+  );
 }
