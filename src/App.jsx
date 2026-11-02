@@ -3,6 +3,7 @@ import { Link, Route, Routes, useLocation, useNavigate } from "react-router-dom"
 import { useCart } from "./store";
 import { track } from "./analytics";
 import { Shop, SalePage, Product, CartPage, Checkout, Thanks } from "./pages";
+import CartDrawer from "./CartDrawer";
 
 function PageViews() {
   const l = useLocation();
@@ -12,7 +13,7 @@ function PageViews() {
 }
 
 function Header() {
-  const { count } = useCart();
+  const { count, openCart } = useCart();
   const nav = useNavigate();
   const [q, setQ] = useState("");
   const [open, setOpen] = useState(false);
@@ -30,7 +31,7 @@ function Header() {
           <input value={q} onChange={(e) => setQ(e.target.value)} type="search" placeholder="Search fragrances" aria-label="Search products" />
         </form>
         <button className="btn ghost" onClick={() => setOpen(!open)}>dataLayer</button>
-        <Link className="btn" to="/cart">Cart ({count})</Link>
+        <button className="btn" onClick={openCart}>Cart ({count})</button>
       </header>
       {open && <div id="log" aria-live="polite">{ev.length ? ev.map((e, i) => <div key={i}>{JSON.stringify(e)}</div>) : "No events yet."}</div>}
     </>
@@ -42,6 +43,7 @@ export default function App() {
     <>
       <PageViews />
       <Header />
+      <CartDrawer />
       <main>
         <Routes>
           <Route path="/" element={<Shop />} />
