@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
 import { useCart } from "./store";
 import { inr } from "./data";
-
+import { ecom, gaItem } from "./analytics";
 export default function CartDrawer() {
   const {
     lines,
@@ -57,35 +57,28 @@ export default function CartDrawer() {
    *
    * Therefore old listeners remain attached.
    */
-  useEffect(() => {
+    useEffect(() => {
     const checkoutButton = document.querySelector("#drawer-checkout");
-
     if (!checkoutButton) return;
 
     const handleCheckout = () => {
-      const purchaseEvent = {
-        event: "purchase",
+      console.log("🔥 PURCHASE EVENT FIRED");
+      ecom("purchase", {
         transaction_id: "LUMA-1001",
         value: t.net,
-        currency: "INR",
-      };
-
-      console.log("🔥 PURCHASE EVENT FIRED", purchaseEvent);
-
-      // Simulate sending event to tracking system
-      window.dataLayer = window.dataLayer || [];
-      window.dataLayer.push(purchaseEvent);
-
-      console.log("📤 Event pushed to dataLayer");
+        items: lines.map((l) => gaItem(l.p, l.q)),
+      });
     };
 
     console.log("⚠️ Checkout listener ATTACHED");
-
     checkoutButton.addEventListener("click", handleCheckout);
 
-    // ❌ BUG:
-    // Missing removeEventListener()
+    // ❌ BUG: missing removeEventListener() cleanup
   }, [drawer, t.net]);
+
+    
+      // Simulate sending event to tracking system
+    
 
   return (
     <>
