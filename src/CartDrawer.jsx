@@ -63,7 +63,7 @@ export default function CartDrawer() {
 
     const handleCheckout = () => {
       console.log("🔥 PURCHASE EVENT FIRED");
-      ecom("purchase", {
+      ecom("checkout", {
         transaction_id: "LUMA-1001",
         value: t.net,
         items: lines.map((l) => gaItem(l.p, l.q)),
