@@ -35,6 +35,7 @@ export function Shop() {
     return r;
   }, [cat, q, sort]);
   useEffect(() => { document.title = "Luma Scents | Perfumes, candles and fragrance gifts"; }, []);
+  // view_promotion fires once per tab session, when at least half of the banner is on screen.
   const promoRef = useRef(null);
   useEffect(() => {
     const el = promoRef.current;
@@ -51,8 +52,6 @@ export function Shop() {
     io.observe(el);
     return () => io.disconnect();
   }, []);
-  // view_promotion fires once, when at least half of the banner is actually on screen.
-  
   useEffect(() => {
     if (list.length) ecom("view_item_list", { item_list_id: cat.toLowerCase().replace(/ /g, "_"), item_list_name: ln, items: list.map((p, i) => gaItem(p, 1, { index: i, item_list_name: ln })) }, true);
   }, [list]); // eslint-disable-line
@@ -169,7 +168,7 @@ export function CartPage() {
       {lines.map((l) => (
         <div className="line" key={l.p.id}>
           <b>{l.p.name}</b><span>{inr(l.p.price * l.q)}</span>
-          <span className="qty"><button onClick={() => dec(l.p)} aria-label="Decrease quantity">−</button>{l.q}<button onClick={() => add(l.p)} aria-label="Increase quantity">+</button></span>
+          <span className="qty"><button onClick={() => dec(l.p)} aria-label="Decrease quantity">−</button>{l.q}<button onClick={() => add(l.p, 1, false)} aria-label="Increase quantity">+</button></span>
           <button className="chip" onClick={() => remove(l.p)}>Remove</button>
         </div>
       ))}
