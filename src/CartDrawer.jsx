@@ -72,7 +72,10 @@ export default function CartDrawer() {
 
     console.log("⚠️ Checkout listener ATTACHED");
     checkoutButton.addEventListener("click", handleCheckout);
-
+    return () => {
+      console.log("🧹 Checkout listener REMOVED");
+      checkoutButton.removeEventListener("click", handleCheckout);
+    };
     // ❌ BUG: missing removeEventListener() cleanup
   }, [drawer, t.net]);
 
