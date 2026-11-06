@@ -196,6 +196,7 @@ function sendIngest(event, data, opts = {}) {
           coupon: data.coupon,
           shipping: data.shipping,
           tax: data.tax,
+          cod_fee: data.cod_fee, // informational only: already included in value, not an extra item
           payment_type: data.payment_type,
           items: (data.items || []).map((i, idx) => ({
             item_id: i.item_id,
@@ -247,6 +248,7 @@ export function trackPurchase(o) {
     value: o.total,
     tax: o.tax,
     shipping: o.shipping,
+    cod_fee: o.codFee || 0, // separate parameter; value above (o.total) already includes it
     coupon: o.coupon || undefined,
     payment_type: o.pay, // payment method picked on the checkout payment step
     items: o.items
