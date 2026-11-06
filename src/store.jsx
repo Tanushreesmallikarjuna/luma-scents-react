@@ -3,6 +3,21 @@ import { byId } from "./data";
 import { ecom, gaItem } from "./analytics";
 
 export const RATES = { WELCOME10: 0.1, SALE50: 0.5 };
+export const COD_FEE = 50; // flat Cash on Delivery handling fee (INR), charged only when the payment method is COD
+
+// Single source of truth for every amount shown or reported at checkout.
+// `pay` is the selected payment method ("UPI" | "Card" | "COD"). The COD fee is derived from it
+// on every call (never stored or accumulated), so it can only ever be added once.
+export function computeTotals(lines, coupon, express = false, pay = "") {
+  const sub = lines.reduce((s, l) => s + l.p.price * l.q, 0);
+  const disc = Math.round(sub * (RATES[coupon] || 0));
+  const net = sub - disc;
+  const shipping = (net >= 2000 || sub === 0 ? 0 : 99) + (express && sub ? 150 : 0);
+  const tax = Math.round(net * 0.18); // GST is on the discounted product value only, not on shipping or the COD fee
+  const codFee = pay === "COD" && sub ? COD_FEE : 0;
+  return { sub, disc, net, shipping, tax, codFee, total: net + shipping + tax + codFee };
+}
+
 const Ctx = createContext(null);
 export const useCart = () => useContext(Ctx);
 const read = () => { try { return JSON.parse(localStorage.getItem("luma_cart")) || {}; } catch { return {}; } };
@@ -48,14 +63,7 @@ export function CartProvider({ children }) {
   };
 
   // Demo totals. In the full-stack version the server calculates these.
-  const totals = (express = false) => {
-    const sub = lines.reduce((s, l) => s + l.p.price * l.q, 0);
-    const disc = Math.round(sub * (RATES[coupon] || 0));
-    const net = sub - disc;
-    const shipping = (net >= 2000 || sub === 0 ? 0 : 99) + (express && sub ? 150 : 0);
-    const tax = Math.round(net * 0.18);
-    return { sub, disc, net, shipping, tax, total: net + shipping + tax };
-  };
+  const totals = (express = false, pay = "") => computeTotals(lines, coupon, express, pay);
 
   return (
     <Ctx.Provider value={{ lines, count, add, dec, remove, clear, coupon, setCoupon, totals, drawer, setDrawer, openCart }}>
