@@ -195,7 +195,8 @@ export function Checkout() {
   const [step, setStep] = useState(1);
   const [ship, setShip] = useState("Standard");
   const [customer, setCustomer] = useState({});
-  const t = totals(ship === "Express");
+  const [pay, setPay] = useState("UPI"); // selected payment method; totals recalculate from it on every render
+  const t = totals(ship === "Express", pay);
   const items = lines.map((l) => gaItem(l.p, l.q));
   useEffect(() => { setTitle("Checkout"); if (lines.length) ecom("begin_checkout", { value: t.net, coupon: coupon || undefined, items }, true); }, []); // eslint-disable-line
   if (!lines.length) return <div className="page"><h2>Your cart is empty</h2><Link className="btn" to="/">Continue shopping</Link></div>;
@@ -211,10 +212,9 @@ export function Checkout() {
   };
   const paySubmit = (e) => {
     e.preventDefault();
-    const pay = new FormData(e.target).get("p");
     ecom("add_payment_info", { value: t.net, coupon: coupon || undefined, payment_type: pay, items });
     // Demo only: a real store confirms payment on the server (Razorpay signature + webhook) before this step.
-    const order = { id: dummyTransactionId(), total: t.total, tax: t.tax, shipping: t.shipping, coupon, items, pay, customer };
+    const order = { id: dummyTransactionId(), total: t.total, tax: t.tax, shipping: t.shipping, codFee: t.codFee, coupon, items, pay, customer };
     try { localStorage.setItem("luma_order", JSON.stringify(order)); } catch { /* ignore */ }
     clear();
     nav("/thanks", { replace: true });
@@ -237,12 +237,13 @@ export function Checkout() {
       ) : (
         <form onSubmit={paySubmit}>
           <label>Payment method
-  <select name="p" defaultValue="UPI">
+  <select name="p" value={pay} onChange={(e) => setPay(e.target.value)}>
     <option value="UPI">UPI</option>
     <option value="Card">Card</option>
     <option value="COD">Cash on delivery</option>
   </select>
 </label>
+          {pay === "COD" && <p className="mute">Cash on delivery adds a {inr(t.codFee)} handling fee.</p>}
           <p className="mute">Demo only: no payment is collected and no card details are stored.</p>
           <button className="btn">Pay {inr(t.total)}</button>
         </form>
@@ -250,6 +251,7 @@ export function Checkout() {
       <div className="tot" style={{ maxWidth: 520, marginTop: 22 }}>
         {lines.map((l) => <div key={l.p.id}><span>{l.p.name} × {l.q}</span><span>{inr(l.p.price * l.q)}</span></div>)}
         {t.disc > 0 && <div><span>Discount ({coupon})</span><span>−{inr(t.disc)}</span></div>}
+        {t.codFee > 0 && <div><span>COD handling fee</span><span>{inr(t.codFee)}</span></div>}
         <div className="g"><span>Total</span><span>{inr(t.total)}</span></div>
       </div>
     </div>
