@@ -48,7 +48,18 @@ export function CartProvider({ children }) {
     const q = cart[p.id], next = { ...cart };
     delete next[p.id];
     setCart(next);
-    ecom("remove_from_cart", { value: p.price * q, items: [gaItem(p, q)] });
+    ecom("remove_from_cart", {
+  value: Object.entries(cart).reduce((sum, [id, qty]) => {
+    const product = byId(id);
+    return sum + (product ? product.price * qty : 0);
+  }, 0),
+  items: Object.entries(cart)
+    .map(([id, qty]) => {
+      const product = byId(id);
+      return product ? gaItem(product, qty) : null;
+    })
+    .filter(Boolean)
+});
   };
   const clear = () => setCart({});
 
