@@ -32,12 +32,30 @@ export function CartProvider({ children }) {
 
   // Analytics calls sit in these handlers (fired by clicks), not inside setState updaters.
   const add = (p, n = 1) => {
-    const q = (cart[p.id] || 0) + n;
-    if (q > p.stock) return false; // never exceed stock
-    setCart({ ...cart, [p.id]: q });
-    ecom("add_to_cart", { value: p.price * n, items: [gaItem(p, n)] });
-    return true;
-  };
+  const q = (cart[p.id] || 0) + n;
+  if (q > p.stock) return false;
+
+  setCart({ ...cart, [p.id]: q });
+
+  ecom("add_to_cart", {
+    value: Object.entries(cart).reduce((sum, [id, qty]) => {
+      const product = byId(id);
+      return sum + (product ? product.price * qty : 0);
+    }, 0) + p.price * n,
+
+    items: [
+      ...Object.entries(cart)
+        .map(([id, qty]) => {
+          const product = byId(id);
+          return product ? gaItem(product, qty) : null;
+        })
+        .filter(Boolean),
+      gaItem(p, n)
+    ]
+  });
+
+  return true;
+};
   const dec = (p) => {
     const q = cart[p.id] - 1, next = { ...cart };
     if (q < 1) delete next[p.id]; else next[p.id] = q;
