@@ -117,15 +117,75 @@ export function SalePage() {
   );
 }
 
+// Simulates a slow variant/SKU API (3 s)
+const loadVariants = (p) =>
+  new Promise((res) =>
+    setTimeout(() => res([{ itemId: p.id, sku: "SKU-" + String(p.id).toUpperCase(), name: "50 ml", price: p.price }]), 3000)
+  );
+
+// Priority: variant id -> variant sku -> product id. Never use item_name as an ID.
+function buildItem(p, variant, quantity = 1) {
+  const id = variant?.itemId || variant?.sku || p?.id || null;
+  if (!id) return null;
+  return { item_id: String(id), item_sku: variant?.sku ?? String(id), item_name: p.name, item_variant: variant?.name, price: variant?.price ?? p.price, quantity };
+}
+
+function validateItem(it) {
+  const errors = [];
+  ["item_id", "item_sku", "item_name", "price", "quantity"].forEach((k) => {
+    if (it?.[k] === null || it?.[k] === undefined || it?.[k] === "") errors.push(`${k} missing`);
+  });
+  return errors;
+}
+
 export function Product() {
   const { slug } = useParams();
+  const [sp] = useSearchParams();
+  const BUG = sp.get("bug") === "1";
   const p = bySlug(slug);
   const { add } = useCart();
   const nav = useNavigate();
   const [msg, setMsg] = useState("");
+  const [variant, setVariant] = useState(null);
+
   useEffect(() => { if (p) { setTitle(p.name); ecom("view_item", { value: p.price, items: [gaItem(p, 1)] }, true); } }, [p]);
+
+  useEffect(() => {
+    if (!p) return;
+    let cancelled = false;
+    setVariant(null);
+    (async () => {
+      try {
+        const variants = await loadVariants(p);
+        if (!cancelled) setVariant(variants[0] ?? null);
+      } catch (err) { console.error("[product] variant load failed", err); }
+    })();
+    return () => { cancelled = true; };
+  }, [p]);
+
   if (!p) return <div className="page"><h2>Product not found</h2><Link className="btn" to="/">Back to shop</Link></div>;
-  const addOne = () => { const ok = add(p); setMsg(ok ? "Added to cart" : "No more stock available"); return ok; };
+
+  const ready = Boolean(variant?.itemId);
+
+  const addOne = () => {
+    const item = BUG
+      ? { item_id: variant?.itemId ?? null, item_sku: variant?.sku ?? null, item_name: p.name, price: p.price, quantity: 1 }
+      : buildItem(p, variant);
+    const errors = BUG ? [] : validateItem(item);
+    if (errors.length) {
+      window.dataLayer = window.dataLayer || [];
+      window.dataLayer.push({ event: "tracking_validation_error", failed_event: "add_to_cart", errors });
+      setMsg("Please wait, loading product options");
+      return false;
+    }
+    ecom("add_to_cart", { currency: "INR", value: item.price, items: [item] });
+    const ok = add(p, 1, false);
+    setMsg(ok ? "Added to cart" : "No more stock available");
+    return ok;
+  };
+
+  const disabled = !BUG && !ready;
+
   return (
     <div className="page">
       <Link className="btn ghost" to="/">Back to shop</Link>
@@ -137,14 +197,18 @@ export function Product() {
           <p>{p.stock ? `In stock (${p.stock} left)` : "Out of stock"}</p>
           <h3>Fragrance notes</h3><p>{p.notes}</p>
           <p className="mute">Prices exclude 18% GST. Free shipping above ₹2,000.</p>
-          {p.stock > 0 && <div className="row"><button className="btn" onClick={addOne}>Add to cart</button><button className="btn ghost" onClick={() => addOne() && nav("/checkout")}>Buy now</button></div>}
+          {p.stock > 0 && (
+            <div className="row">
+              <button className="btn" onClick={addOne} disabled={disabled}>{disabled ? "Loading options…" : "Add to cart"}</button>
+              <button className="btn ghost" onClick={() => addOne() && nav("/checkout")} disabled={disabled}>Buy now</button>
+            </div>
+          )}
           <p role="status">{msg}</p>
         </div>
       </div>
     </div>
   );
 }
-
 export function CartPage() {
   const { lines, add, dec, remove, coupon, setCoupon, totals } = useCart();
   const [code, setCode] = useState(coupon);
